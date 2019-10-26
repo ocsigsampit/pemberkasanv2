@@ -36,6 +36,18 @@ Class Pemberkasan extends CI_Controller{
 		}
 	}
 	
+	public function data_berkas(){
+		if($this->session->userdata('status_login') == "ON"){
+			$data['pageTitle']   = 'Data Berkas';
+			$data['menunye']     = $this->model_pemberkasan->daftarMenu();
+			$data['pageContent'] = $this->load->view('pemberkasan/data_berkas', $data, TRUE);
+			
+			$this->load->view('template/layout', $data);
+		}else{
+			redirect('auth');
+		}
+	}
+	
 	public function peminjaman(){
 		if($this->session->userdata('status_login')=="ON"){
 			$data['pageTitle']   = 'Peminjaman';
@@ -62,7 +74,6 @@ Class Pemberkasan extends CI_Controller{
 		$this->form_validation->set_rules("tgl_nd", "Tanggal Nota Dinas", "required");
 		
 		if($this->form_validation->run()){
-			
 			$no_nd      = $this->input->post("no_nd");
 			$tgl_nd     = $this->input->post("tgl_nd");
 			$id_user    = $this->session->userdata("id_user");
@@ -117,17 +128,14 @@ Class Pemberkasan extends CI_Controller{
 		}else{
 			redirect('auth');
 		}
-		
 	}
 	
 	public function selesai(){
 		$id_peminjaman = $this->input->post("id_peminjaman");
-		
 		$this->model_pemberkasan->selesai($id_peminjaman);
 	}
 	
 	public function cetakND($id_peminjaman){
-		
 		$dataND    = $this->model_pemberkasan->isiNDById($id_peminjaman);
 		$dataSeksi = $this->model_pemberkasan->cariSeksi($this->session->userdata('id_user'));
 		
@@ -244,5 +252,57 @@ Class Pemberkasan extends CI_Controller{
 		$pdf->Cell(20,5,ucwords(strtolower($nama_kasi)),0,1,'L');
 		
         $pdf->Output('I',$no_nd.'.pdf');
+	}
+	
+	public function imporCSV(){
+		if($this->session->userdata('status_login')=="ON"){
+			if($this->session->userdata('role') == "2"){
+				$data['pageTitle']   = 'Import CSV Berkas';
+				$data['menunye']     = $this->model_pemberkasan->daftarMenu();
+				$data['pageContent'] = $this->load->view('pemberkasan/imporCSV', $data, TRUE);
+				
+				$this->load->view('template/layout', $data);
+			}else{
+				redirect('pemberkasan/index/');
+			}
+		}else{
+			redirect('auth');
+		}
+	}
+	
+	public function import(){
+		//print_r($_FILES);
+		$namaFile = $_FILES['berkas']['name'];	
+		$namaTmp  = $_FILES['berkas']['tmp_name'];
+		$tempat   = './assets/upload/';
+		
+		$pindah = move_uploaded_file($namaTmp, $tempat.$namaFile);
+		
+		if($pindah){
+			echo "Upload berhasil !<br/>";
+			$theFile = $tempat.$namaFile;
+		}else{
+			echo "err";
+		}
+		
+		$qry = "LOAD DATA LOCAL INFILE '".$theFile."' INTO TABLE tb_berkas FIELDS TERMINATED BY ';' LINES TERMINATED BY '\n' (id_jns_berkas, npwp, nama_wp, masa_pajak, tahun_pajak, pembetulan, id_box, no_urut, status)";
+		
+		$this->db->query($qry);
+	}
+	public function berkas_dipinjam(){
+		if($this->session->userdata('status_login') == "ON"){	
+			if($this->session->userdata('role') == "1" || $this->session->userdata('role') == "2"){
+				$data['pageTitle']   = 'Daftar Berkas yang Sedang Dipinjam';
+				$data['menunye']     = $this->model_pemberkasan->daftarMenu();
+				$data['semua']       = $this->model_pemberkasan->daftarBerkasSedangDipinjam('', '');
+				$data['pageContent'] = $this->load->view('pemberkasan/sedangDipinjam', $data, TRUE);
+				
+				$this->load->view('template/layout', $data);
+			}else{
+				redirect('pemberkasan/index/');
+			}
+		}else{
+			redirect('auth');
+		}
 	}
 }

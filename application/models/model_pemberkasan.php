@@ -18,11 +18,15 @@ Class Model_pemberkasan extends CI_Model{
 		$qry = $this->db->query("SELECT 
 			a.id_berkas,
 			a.npwp, 
-			a.nama_wp, 
-			b.jenis_berkas, 
-			concat(a.masa_pajak|a.tahun_pajak) as msthn, 
+			a.nama_wp,
+			a.id_box,
+			a.no_urut,
+			c.ruangan,
+			b.jenis_berkas AS jenis_berkas, 
+			CONCAT(a.tahun_pajak,'-',a.masa_pajak) as msthn, 
 			a. pembetulan 
 			FROM tb_berkas a LEFT JOIN tb_jenis_berkas b ON (a.id_jns_berkas = b.id_jns_berkas) 
+			LEFT JOIN tb_box c ON (a.id_box = c.id_box) 
 			WHERE ".$kriteria." AND status ='0' ORDER BY a.id_berkas");
 		
 		return $qry->result();
@@ -76,6 +80,7 @@ Class Model_pemberkasan extends CI_Model{
 			concat(b.masa_pajak|b.tahun_pajak) as msthn, 
 			b. pembetulan,
 			b.id_box,
+			b.no_urut,
 			d.ruangan 
 			FROM tb_detail_peminjaman a LEFT JOIN tb_berkas b ON (a.id_berkas = b.id_berkas) 
 			LEFT JOIN tb_jenis_berkas c ON (b.id_jns_berkas = c.id_jns_berkas) 
@@ -105,7 +110,7 @@ Class Model_pemberkasan extends CI_Model{
 		$hari_ini = date("Y-m-d H:i:s");
 		
 		echo $this->db->query("UPDATE tb_peminjaman SET tgl_selesai = '".$hari_ini."' WHERE id_peminjaman = '".$id_peminjaman."'");	
-		echo $this->db->query("UPDATE tb_berkas SET status = '0' WHERE id_berkas IN (SELECT id_berkas FROM tb_peminjaman WHERE id_peminjaman = '".$id_peminjaman."')");	
+		echo $this->db->query("UPDATE tb_berkas SET status = '1' WHERE id_berkas IN (SELECT id_berkas FROM tb_detail_peminjaman WHERE id_peminjaman = '".$id_peminjaman."')");	
 	}
 	
 	public function isiNDById($id_peminjaman){
@@ -143,7 +148,31 @@ Class Model_pemberkasan extends CI_Model{
 	
 	public function simpanStatusDipinjam($id_berkas){
 		$query = $this->db->query("UPDATE tb_berkas SET status ='1' WHERE id_berkas = ".$id_berkas);
-		
 	}
 	
+	public function importCSVBerkas($data){
+		return $this->db->insert('tb_berkas', $data);	
+	}
+	
+	public function daftarBerkasSedangDipinjam($kolom='', $katakunci=''){
+		if($kolom == "id_user"){
+			$kriteria = " AND id_user = '".$katakunci."' ";
+		}else{
+			$kriteria = " ";
+		}
+		
+		$qry = $this->db->query("SELECT 
+			a.id_berkas,
+			a.npwp,
+			a.nama_wp,
+			c.id_user,
+			d.nama,
+			c.tgl_pinjam 
+			FROM tb_berkas a LEFT JOIN tb_detail_peminjaman b ON (a.id_berkas = b.id_berkas) 
+			LEFT JOIN tb_peminjaman c ON (b.id_peminjaman = c.id_peminjaman) 
+			LEFT JOIN tb_user d ON (d.id_user = c.id_user)
+			WHERE status = '1'".$kriteria." ORDER BY b.id_peminjaman DESC");
+		
+		return $qry->result();
+	}
 }

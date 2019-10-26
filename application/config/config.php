@@ -24,7 +24,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 |
 */
 
-$config['base_url'] = 'http://127.0.0.1:4001/CIverBolayanan/';
+$config['base_url'] = 'http://127.0.0.1:4001/pemberkasanv2/';
 
 /*
 |--------------------------------------------------------------------------

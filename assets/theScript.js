@@ -66,6 +66,48 @@ $(document).ready(function(){
 		}
 	});
 	
+	//Pencarian dengan Kata Kunci oleh ARSIPARIS
+	$("#tmb_cari_data").click(function(){
+		var pilihanKatakunci = $("input[name=pilihan_katakunci]:checked").val();
+		//alert(pilihanKatakunci);
+		var katakunci = $("#katakunci").val();
+		
+		if(katakunci == ""){
+			alert("Kolom Pencarian harus diisi!");
+			return false;
+		}else{
+			$("#load_diplay").html("    processsssing...");
+			
+			$.ajax({
+				type : "post",
+				url  : theSite + "/pemberkasan/cari",
+				data : "katakunci=" + katakunci + "&kolom=" + pilihanKatakunci,
+				success  : function(data){
+					var Jason = JSON.parse(data);
+					
+					if(Jason.length > 0){					
+						var nomer   	  = 1;
+						var isi           = "<table class='table display compact table-bordered table-condensed table-striped tbl-ga tablesorter' id='tablenya'><thead><tr><th class='text-center'>No</th><th class='text-center'>N P W P</th><th class='text-center'>NAMA WP</th><th class='text-center'>JENIS BERKAS</th><th class='text-center'>MS/THN PJK</th><th class='text-center'>PBT</th><th class='text-center'>BOX</th><th class='text-center'>No Urut</th><th class='text-center'>Ruangan</th></tr></thead><tbody>";
+						
+						$.each(Jason,function(i){
+							isi = isi + "<tr><td class='text-center'>" + nomer + "</td><td class='text-center'>" + npwpBerTB(Jason[i].npwp) + "</td><td>" + Jason[i].nama_wp + "</td><td class='text-center'>" + Jason[i].jenis_berkas + "</td><td class='text-center'>" + teks(Jason[i].msthn) + "</td><td class='text-center'>" + teks(Jason[i].pembetulan) + "</td><td class='text-center'>" + teks(Jason[i].id_box) + "</td><td class='text-center'>" + teks(Jason[i].no_urut) + "</td><td class='text-center'>" + teks(Jason[i].ruangan) + "</td></tr>";
+							nomer = nomer + 1;
+						});
+						
+						isi += "</tbody>";
+						
+						$("#wadah").html(isi);
+						$("#tablenya").DataTable();
+						$("#load_diplay").html("Done !");
+					}else{
+						$("#wadah").html("DATA TIDAK DITEMUKAN / BERKAS SEDANG DIPINJAM !");
+						$("#load_diplay").html("Done !");
+					}
+				}
+			});
+		}
+	});
+	
 	function npwpBerTB(teks){
 		var hasil = teks.substr(0,2) + "." + teks.substr(2,3) + "." + teks.substr(5,3) + "." + teks.substr(8,1) + "-" + teks.substr(9,3) + "." + teks.substr(12,3);
 		
@@ -84,7 +126,7 @@ $(document).ready(function(){
 		
 		total += jumlah;
 	
-		$("#total_item").html("Jumlah item yang Anda pilih : <b>" + total + "</b>");
+		//$("#total_item").html("Jumlah item yang Anda pilih : <b>" + total + "</b>");
 		$("#tmb_form_peminjaman").removeClass("hidden");
 	});
 	

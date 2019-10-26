@@ -11,6 +11,7 @@
 					<th class="text-center">MS/THN Pjk</th>
 					<th class="text-center">Pbt</th>
 					<th class="text-center">KD BOX</th>
+					<th class="text-center">URUT</th>
 					<th class="text-center">Ruangan</th>
 				</tr>
 			</thead>
@@ -26,6 +27,7 @@
 				echo "<td class='text-center'>".$r->msthn."</td>";
 				echo "<td class='text-center'>".$r->pembetulan."</td>";
 				echo "<td class='text-center'>".$r->id_box."</td>";
+				echo "<td class='text-center'>".$r->no_urut."</td>";
 				echo "<td class='text-center'>".$r->ruangan."</td>";
 				echo "</tr>";
 				$no++;
