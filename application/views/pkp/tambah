@@ -1,0 +1,34 @@
+<div class="panel panel-default">
+	<div class="panel-heading"><h4>REKAM PEMOHONAN</h4></div>
+	<div class="panel-body">
+		<div class="form-horizontal col-sm-12 col-lg-8">
+			<div class="form-group">
+				<label  class="col-sm-4 control-label">PILIH JENIS LAYANAN</label>
+				<div class="col-sm-6">
+					<select class="form-control" id="id_layanan">
+						<option value="">Pengukuhan PKP</option>
+						<option value="">Sertifikat Elektronik</option>
+					</select>
+				</div>
+			</div>
+			<div class="form-group">
+				<label  class="col-sm-4 control-label">NO BPS</label>
+				<div class="col-sm-6">
+					<input type="text" name="no_bps"/>
+				</div>
+			</div>
+			<div class="form-group">
+				<label  class="col-sm-4 control-label">N P W P</label>
+				<div class="col-sm-6">
+					<input type="text" name="npwp"/>
+				</div>
+			</div>
+			<div class="form-group">
+				<label  class="col-sm-4 control-label">NAMA WAJIB PAJAK</label>
+				<div class="col-sm-6">
+					<input type="text" name="nama_wp"/>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>

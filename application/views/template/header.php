@@ -17,6 +17,7 @@
 	<script src="<?=base_url('assets/tablesorter/jquery.tablesorter.min.js');?>"></script>
 	<script src="<?=base_url('assets/bsdatepicker/js/bootstrap-datepicker.min.js');?>"></script>
 	<script src="<?=base_url('assets/icheck-1.x/icheck.min.js');?>"></script>
+	<script src="<?=base_url('assets/jquerymask/jquery.mask.min.js');?>"></script>
 	
 	<link rel="stylesheet" href="<?=base_url('assets/bootstrap/css/bootstrap.min.css');?>"><!--BOOTSTRAP-->
 	<link rel="stylesheet" href="<?=base_url('assets/font-awesome/css/font-awesome.min.css');?>"><!--FONT AWESOME-->
@@ -47,9 +48,9 @@
 		<!-- Logo -->
 		<a href="<?=site_url('pemberkasan/');?>" class="logo">
 			<!-- mini logo for sidebar mini 50x50 pixels -->
-			<span class="logo-mini"><b><span><img src="<?=base_url('/images/box2.png');?>"></span></b></span>
+			<span class="logo-mini"><b><span><img src="<?=base_url('/images/pkp_icon.png');?>"></span></b></span>
 			<!-- logo for regular state and mobile devices -->
-			<span class="logo-lg"><b>PEMBERKASAN</b></span>
+			<span class="logo-lg"><b>PEKAPE</b></span>
 		</a>
 
 		<!-- Header Navbar -->

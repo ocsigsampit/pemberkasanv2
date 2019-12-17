@@ -11,13 +11,13 @@ class Auth extends CI_Controller{
 	}
 
 	public function index(){
-		if($this->session->userdata('status_login')!== "ON"){
+		if($this->session->userdata('status_login') !== "ON"){
 			redirect('auth/halaman_login');			
 		}
 	}
 
 	public function halaman_login(){
-		$this->load->view("pemberkasan/form_login2");
+		$this->load->view("auth/login_page");
 	}
 
 	public function cek_login(){
@@ -35,7 +35,7 @@ class Auth extends CI_Controller{
 				$data_session["role"]         = $sess->role;
 				$this->session->set_userdata($data_session);
 			}
-			redirect("pemberkasan");
+			redirect("pkp");
 		}else{
 			redirect("auth/halaman_login");
 		}

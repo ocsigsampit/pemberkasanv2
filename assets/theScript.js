@@ -1,9 +1,17 @@
 $(document).ready(function(){
-	var total = 0;
+	var base   = 'http://127.0.0.1:4001/pekape/';
+	var total  = 0;
+	var urutan = 2;
+	
+	$("#form_pengurus").hide();
+	$("#tmb_simpan_data_akta").hide();
+	$("#tmb_simpan_data_pengurus").hide();
+	$("#btn_simpan_klu").hide();
+	
+	$('.mask-npwp').mask('00.000.000.0-000.000');
 	
 	$('.datepicker').datepicker({
 		format: 'yyyy-mm-dd',
-		//startDate: '-3d'
 		autoclose: true,
 		todayHighlight: true
 	});
@@ -14,199 +22,229 @@ $(document).ready(function(){
 		increaseArea: '20%'
 	});
 	
-	//Pencarian dengan Kata Kunci
-	$("#tmb_cari").click(function(){
-		var pilihanKatakunci = $("input[name=pilihan_katakunci]:checked").val();
-		//alert(pilihanKatakunci);
-		var katakunci = $("#katakunci").val();
+	//Tombol "Simpan Data WP"
+	$("#tmb_simpan_data_wp").click(function(){
+		let data = $("#form_data_wp").serialize();
 		
-		if(katakunci == ""){
-			alert("Kolom Pencarian harus diisi!");
-			return false;
-		}else{
-			$("#load_diplay").html("    processsssing...");
-			
-			$.ajax({
-				type : "post",
-				url  : theSite + "/pemberkasan/cari",
-				data : "katakunci=" + katakunci + "&kolom=" + pilihanKatakunci,
-				success  : function(data){
-					var Jason = JSON.parse(data);
-					
-					if(Jason.length > 0){					
-						var nomer   	  = 1;
-						var isi           = "<table class='table display compact table-bordered table-condensed table-striped tbl-ga tablesorter' id='tablenya'><thead><tr><th class='text-center'>No</th><th class='text-center'>N P W P</th><th class='text-center'>NAMA WP</th><th class='text-center'>JENIS BERKAS</th><th class='text-center'>MS/THN PJK</th><th class='text-center'>PBT</th><th class='text-center'>PILIH</th></tr></thead><tbody>";
-						
-						$.each(Jason,function(i){
-							isi = isi + "<tr><td class='text-center'>" + nomer + "</td><td class='text-center'>" + npwpBerTB(Jason[i].npwp) + "</td><td>" + Jason[i].nama_wp + "</td><td class='text-center'>" + Jason[i].jenis_berkas + "</td><td class='text-center'>" + teks(Jason[i].msthn) + "</td><td class='text-center'>" + teks(Jason[i].pembetulan) + "</td><td class='text-center'><input type='checkbox' class='pilihan' name='terpilih' value='" + Jason[i].id_berkas + "' konter=1></td></tr>";
-							nomer = nomer + 1;
-						});
-						
-						isi += "</tbody>";
-						
-						$("#wadah").html(isi);
-						$("#tablenya").DataTable({
-							"order": [[ 0, "asc" ]],
-							"fnDrawCallback": function() {
-								/*----Supaya icheck diterapkan di semua paging----*/
-								$(document).trigger('icheck');
-							}
-						});
-						$("#load_diplay").html("Done !");
-						
-						//----This is THE KEY of icheck in table rows-----!
-						$(document).trigger('icheck');
-						//-----------------------------------------------//
-					}else{
-						$("#wadah").html("DATA TIDAK DITEMUKAN / BERKAS SEDANG DIPINJAM !");
-						$("#load_diplay").html("Done !");
-					}
+		$.ajax({
+			url  : base + "/pkp/simpan_data_wp", 
+			type : "POST",
+			data : data,
+			success: function(hasil){
+				if(hasil === "1"){
+					alert("Data Permohonan berhasil disimpan");
+					$("#tmb_simpan_data_akta").show();
+					$("#tmb_simpan_data_wp").hide();
+				}else if(hasil === "11"){
+					alert("Data Permohonan Baru berhasil disimpan");
+					$("#tmb_simpan_data_akta").show();
+					$("#tmb_simpan_data_wp").hide();
+				}else if(hasil === "111"){
+					alert("Data Permohonan Baru dan KLU Baru berhasil disimpan !");
+					$("#tmb_simpan_data_akta").show();
+					$("#tmb_simpan_data_wp").hide();
 				}
-			});
-		}
+			}
+		});
+	});
+
+	//Tombol "Tambah Baris" form pengurus
+	$("body").on("click",".tambah_baris", function(){
+		let kerangka = `<div class="row" id="baris_pengurus${urutan}">
+							<div class="form-group">
+								<label  class="col-lg-1 control-label">Pengurus ${urutan}</label>
+								<div class="col-lg-4">
+									<input type="text" class="form-control nama_pengurus" name="nama_pengurus" placeholder="Nama Pengurus"/>
+								</div>
+								<div class="col-lg-2">
+									<input type="text" class="form-control nik_pengurus" name="nik_pengurus"  placeholder="NIK"  maxlength="16"/>
+								</div>
+								<div class="col-lg-3">
+									<input type="text" class="form-control npwp_pengurus mask-npwp" name="npwp_pengurus"  placeholder="NPWP"/>
+								</div>
+								<div class="col-lg-2">
+									<button class="btn btn-sm btn-info tambah_baris">Tambah</button>
+									<button class="btn btn-sm btn-danger hapus_baris" baris="${urutan}">Hapus</button>
+								</div>
+							</div>
+						</div>`;
+		urutan++;
+		$("#wadah").append(kerangka);
+		$('.mask-npwp').mask('00.000.000.0-000.000');
+		$('.nik_pengurus').attr("maxlength", "16");
 	});
 	
-	//Pencarian dengan Kata Kunci oleh ARSIPARIS
-	$("#tmb_cari_data").click(function(){
-		var pilihanKatakunci = $("input[name=pilihan_katakunci]:checked").val();
-		//alert(pilihanKatakunci);
-		var katakunci = $("#katakunci").val();
-		
-		if(katakunci == ""){
-			alert("Kolom Pencarian harus diisi!");
-			return false;
-		}else{
-			$("#load_diplay").html("    processsssing...");
-			
-			$.ajax({
-				type : "post",
-				url  : theSite + "/pemberkasan/cari",
-				data : "katakunci=" + katakunci + "&kolom=" + pilihanKatakunci,
-				success  : function(data){
-					var Jason = JSON.parse(data);
-					
-					if(Jason.length > 0){					
-						var nomer   	  = 1;
-						var isi           = "<table class='table display compact table-bordered table-condensed table-striped tbl-ga tablesorter' id='tablenya'><thead><tr><th class='text-center'>No</th><th class='text-center'>N P W P</th><th class='text-center'>NAMA WP</th><th class='text-center'>JENIS BERKAS</th><th class='text-center'>MS/THN PJK</th><th class='text-center'>PBT</th><th class='text-center'>BOX</th><th class='text-center'>No Urut</th><th class='text-center'>Ruangan</th></tr></thead><tbody>";
-						
-						$.each(Jason,function(i){
-							isi = isi + "<tr><td class='text-center'>" + nomer + "</td><td class='text-center'>" + npwpBerTB(Jason[i].npwp) + "</td><td>" + Jason[i].nama_wp + "</td><td class='text-center'>" + Jason[i].jenis_berkas + "</td><td class='text-center'>" + teks(Jason[i].msthn) + "</td><td class='text-center'>" + teks(Jason[i].pembetulan) + "</td><td class='text-center'>" + teks(Jason[i].id_box) + "</td><td class='text-center'>" + teks(Jason[i].no_urut) + "</td><td class='text-center'>" + teks(Jason[i].ruangan) + "</td></tr>";
-							nomer = nomer + 1;
-						});
-						
-						isi += "</tbody>";
-						
-						$("#wadah").html(isi);
-						$("#tablenya").DataTable();
-						$("#load_diplay").html("Done !");
-					}else{
-						$("#wadah").html("DATA TIDAK DITEMUKAN / BERKAS SEDANG DIPINJAM !");
-						$("#load_diplay").html("Done !");
-					}
-				}
-			});
-		}
+	//Tombol "Hapus Baris" form pengurus
+	$("body").on("click",".hapus_baris",function(){
+		const baris = $(this).attr("baris");
+		$("#baris_pengurus" + baris).hide();
 	});
 	
-	function npwpBerTB(teks){
-		var hasil = teks.substr(0,2) + "." + teks.substr(2,3) + "." + teks.substr(5,3) + "." + teks.substr(8,1) + "-" + teks.substr(9,3) + "." + teks.substr(12,3);
+	//Tombol "Simpan Data Pengurus"
+	$("#tmb_simpan_data_pengurus").click(function(){
+		var npwp_badan = $("#npwp").val();
+		let arr_nama = [];
+		let arr_nik  = [];
+		let arr_npwp = [];
 		
-		return hasil;
-	}
-	
-	function teks(text){
-		var hasil = (text == null) ? '' : text;
-		
-		return hasil;
-	}
-	
-	//---Hitung jumlah baris yang dipilih---//
-	$("body").on("ifChecked",".pilihan",function(){
-		var jumlah   = parseInt($(this).attr("konter"));
-		
-		total += jumlah;
-	
-		//$("#total_item").html("Jumlah item yang Anda pilih : <b>" + total + "</b>");
-		$("#tmb_form_peminjaman").removeClass("hidden");
-	});
-	
-	$("body").on("ifUnchecked",".pilihan",function(){
-		var jumlah   = parseInt($(this).attr("konter"));
-		
-		total -= jumlah;
-		$("#total_item").html("Jumlah item yang Anda pilih : <b>" + total + "</b>");
-		if(total == 0) $("#tmb_form_peminjaman").addClass("hidden");
-	});
-	
-	//Trigger Modal Formulir Peminjaman Berkas//
-	$("body").on("click","#tmb_form_peminjaman",function(){
-		var arrPilihan = [];
-		
-		$("input[name='terpilih']:checked").each(function(){
-			arrPilihan.push(this.value);
+		//alert("npwp_badan : " + npwp_badan);
+
+		$(".nama_pengurus").each(function(){
+			arr_nama.push($(this).val());
 		});
 		
-		//alert(arrPilihan);
-		$("#wadah_id_berkas").val(arrPilihan);
-		$("#modal_form_peminjaman").modal("show");
+		$(".nik_pengurus").each(function(){
+			arr_nik.push($(this).val());
+		});
+		
+		$(".npwp_pengurus").each(function(){
+			arr_npwp.push($(this).val());
+		});
+		
+		$.post({
+			type : "POST",
+			url  : base + "/pkp/simpan_data_pengurus",
+			data : {
+				npwp_badan : npwp_badan,
+				nama : arr_nama,
+				nik  : arr_nik,
+				npwp : arr_npwp
+			},
+			success : function(hasil){
+				alert(hasil)
+			}
+		});
 	});
 	
-	$("#tmb_simpan_formulir").click(function(e){
-		e.preventDefault();
+	
+	//AUTOCOMPLETE DATA NPWP
+	$("#npwp").focusout(function(){
+		var npwp = $(this).val();
 		
-		var ids_berkas = $("#wadah_id_berkas").val();
-		var no_nd      = $("#no_nd").val();
-		var tgl_nd     = $("#tgl_nd").val();
-		
-		if(confirm("Yakin ?")){
-			$("#no_nd_error").html('');
-			$("#tgl_nd_error").html('');
-			$.ajax({
-				type : "POST",
-				url  : theSite + "/pemberkasan/simpan_formulir",
-				data : "no_nd=" + no_nd + "&tgl_nd=" + tgl_nd + "&ids_berkas=" + ids_berkas,
-				success : function(data){
-					data2 = JSON.parse(data);
+		$.ajax({
+			url  : base + "pkp/data_NPWP/",
+			type : "POST",
+			data : "npwp=" + npwp,
+			success : function(hasil){
+				var jsonHasil = JSON.parse(hasil);
+				
+				if(jsonHasil.length > 0){
 					
-					if(data2.error){
-						if(data2.no_nd_error !== ''){
-							$("#no_nd_error").html(data2.no_nd_error);
-						}
-						
-						if(data2.tgl_nd_error !== ''){
-							$("#tgl_nd_error").html(data2.tgl_nd_error);
-						}
-					}
+					var a = jsonHasil[0].nama;
+					var b = jsonHasil[0].jenis_wp;
+					var c = jsonHasil[0].alamat1;
+					var d = jsonHasil[0].alamat2;
+					var e = jsonHasil[0].alamat3;
+					var f = jsonHasil[0].kode_klu;
+					var g = jsonHasil[0].tgl_daftar;
 					
-					if(data2.success){
-						$("#success_message").html(data2.success);
-						$("#modal_form_peminjaman").modal("hide");
-						(document).ajaxStop(function() { location.reload(true); });
-					}
+					$("#nama_wp").val(a);
+					$("#alamat1").val(c);
+					$("#alamat2").val(d);
+					$("#kode_klu").val(f);
+					$("#tgl_daftar").val(g);
 					
+					$("#status_permohonan").val("ulang");
+					
+					$("#nama_wp").attr('readonly', true); 
+					$("#alamat1").attr('readonly', true); 
+					$("#alamat2").attr('readonly', true);
+					$("#kode_klu").attr('readonly', true);
+					$("#tgl_daftar").attr('disabled', true);
+				}else{
+					$("#nama_wp").focus();
 				}
-			});
-		}
+			}
+			
+		});
 	});
 	
-	$(".tmb_selesai").click(function(){
-		var id_peminjaman = $(this).attr("data-id_peminjaman");
+	// Tombol "Simpan Data Akta"
+	$("#tmb_simpan_data_akta").click(function(){
+		var no_akta     = $("#no_akta").val();
+		var tempat_akta = $("#tempat_akta").val();
+		var tgl_akta    = $("#tgl_akta").val();
+		var notaris     = $("#notaris").val();
 		
-		if(confirm("Yakin berkas ini telah selesai?")){
-			$.ajax({
-				type : "POST",
-				url  : theSite + "/pemberkasan/selesai",
-				data : "id_peminjaman=" + id_peminjaman,
-				success : function(hasil){
-					if(hasil == "11"){
-						alert("Peminjaman berkas " + id_peminjaman + " telah selesai!");
-						$(document).ajaxStop(function() { window.location.href = theSite + '/pemberkasan/'; });
-					}else{
-						alert("Gagal!");
-					}
+		$.ajax({
+			url  : base + "/pkp/simpan_akta", 
+			type : "POST",
+			data : "no_akta=" + no_akta + "&tempat_akta=" + tempat_akta + "&tgl_akta=" + tgl_akta + "&notaris=" + notaris,
+			success : function(data){
+				if(data == "1"){
+					alert("Data Akta berhasil disimpan!");
+					$("#form_pengurus").show();
+					$("#tmb_simpan_data_pengurus").show();
+					$("#tmb_simpan_data_akta").hide();
 				}
-			});
-		}
+			}
+		});
 	});
 	
+	//Tombol "Simpan Data LHP"
+	$("#tmb_simpan_data_lhp").click(function(){
+		var no_lhp   = $("#no_lhp").val();
+		var tgl_lhp  = $("#tgl_lhp").val();
+		
+		$.ajax({
+			url  : base + "/pkp/simpan_lhp", 
+			type : "POST",
+			data : "no_lhp=" + no_lhp + "&tgl_lhp=" + tgl_lhp,
+			success : function(data){
+				if(data == "1"){
+					alert("Data LHP berhasil disimpan!");
+					$("tmb_simpan_data_lhp").hide();
+				}
+			}
+		});
+	});
+	
+	// Cek kode KLU
+	$("#kode_klu").focusout(function(){
+		var kode_klu = $(this).val();
+		
+		$.ajax({
+			url  : base + "pkp/data_KLU/",
+			type : "POST",
+			data : "kode_klu=" + kode_klu,
+			success : function(hasil){
+				var jsonHasil = JSON.parse(hasil);
+				
+				if(jsonHasil.length > 0){
+					var a = jsonHasil[0].kode;
+					var b = jsonHasil[0].uraian_klu;
+					
+					$("#status_klu").val("ulang");
+					
+					$("#uraian_klu").val(b);
+					$("#uraian_klu").attr('readonly', true);
+				}else{
+					$("#uraian_klu").focus();
+					//$("#btn_simpan_klu").show();
+				}
+			}
+			
+		});
+	});
+
+	
+	//Tombol "Simpan KLU"
+	$("body").on("click","#btn_simpan_klu",function(){
+		//a.preventDefault();
+		alert("Tes!");
+		// var kode_klu   = $("#kode_klu").val();
+		// var uraian_klu = $("#uraian_klu).val();
+		
+		// $.ajax({
+			// url  : base + "/pkp/simpan_klu", 
+			// type : "POST",
+			// data : "kode_klu=" + kode_klu + "&uraian_klu=" + uraian_klu,
+			// success : function(data){
+				// if(data == "1"){
+					// alert("Data KLU berhasil disimpan!");
+					// $("#btn_simpan_klu").hide();
+				// }
+			// }
+		// });
+	});
 });
